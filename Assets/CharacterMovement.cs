@@ -7,6 +7,9 @@ public class CharacterMovement : MonoBehaviour
 
     public int hiz;
     public int ziplamaGucu;
+    public Transform rayPos;
+    public Vector3 rayRotation;
+    public float rayLength;
 
     Rigidbody2D characterRigidbody;
     SpriteRenderer characterSpriteRenderer;
@@ -72,5 +75,21 @@ public class CharacterMovement : MonoBehaviour
             characterRigidbody.AddForce(new Vector2(0,ziplamaGucu));
             characterAnimator.Play("Jump");
         }
+        GroundCheckWithRay();
+    }
+    void GroundCheckWithRay()
+    {
+        RaycastHit2D hit = Physics2D.Raycast(rayPos.position, rayRotation, rayLength);
+
+        if (hit.collider != null)
+        {
+            zemineDegdiMi = true;
+        }
+        else
+        {
+            zemineDegdiMi = false;
+            characterAnimator.Play("Jump");
+        }
+        Debug.DrawRay(rayPos.position, rayRotation * rayLength, Color.green);
     }
 }
