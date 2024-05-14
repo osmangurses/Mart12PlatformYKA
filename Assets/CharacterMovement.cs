@@ -15,6 +15,7 @@ public class CharacterMovement : MonoBehaviour
     SpriteRenderer characterSpriteRenderer;
     public static Animator characterAnimator;
     public static bool zemineDegdiMi;
+    public static bool OlduMu;
 
     private void Start()
     {
@@ -22,60 +23,63 @@ public class CharacterMovement : MonoBehaviour
         characterSpriteRenderer = GetComponent<SpriteRenderer>();
         characterAnimator = GetComponent<Animator>();
     }
-    /*private void OnCollisionEnter2D(Collision2D collision)
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        zemineDegdiMi = true;
+        if (collision.gameObject.tag=="Engel")
+        {
+            characterAnimator.Play("Death");
+            OlduMu = true;
+        }
     }
-    private void OnCollisionExit2D(Collision2D collision)
-    {
-        zemineDegdiMi = false;
-        characterAnimator.Play("Jump");
-    }*/
 
     private void Update()
     {
-        if (Input.GetKey(KeyCode.D))
+        if (OlduMu==false)
         {
-            characterRigidbody.velocity = new Vector2(hiz, characterRigidbody.velocity.y);
-            if (characterSpriteRenderer.flipX==true)
+            if (Input.GetKey(KeyCode.D))
             {
-                characterSpriteRenderer.flipX = false;
+                characterRigidbody.velocity = new Vector2(hiz, characterRigidbody.velocity.y);
+                if (characterSpriteRenderer.flipX == true)
+                {
+                    characterSpriteRenderer.flipX = false;
+                }
+                if (zemineDegdiMi == true)
+                {
+                    characterAnimator.Play("Run");
+                }
             }
-            if (zemineDegdiMi==true)
+            else if (Input.GetKey(KeyCode.A))
             {
-                characterAnimator.Play("Run");
+                characterRigidbody.velocity = new Vector2(-hiz, characterRigidbody.velocity.y);
+                if (characterSpriteRenderer.flipX == false)
+                {
+                    characterSpriteRenderer.flipX = true;
+                }
+                if (zemineDegdiMi == true)
+                {
+                    characterAnimator.Play("Run");
+                }
             }
-        }
-        else if (Input.GetKey(KeyCode.A))
-        {
-            characterRigidbody.velocity = new Vector2(-hiz, characterRigidbody.velocity.y);
-            if (characterSpriteRenderer.flipX == false)
+            else
             {
-                characterSpriteRenderer.flipX = true;
+                characterRigidbody.velocity = new Vector2(0, characterRigidbody.velocity.y);
+                if (zemineDegdiMi == true)
+                {
+                    characterAnimator.Play("Idle");
+                }
             }
-            if (zemineDegdiMi == true)
-            {
-                characterAnimator.Play("Run");
-            }
-        }
-        else
-        {
-            characterRigidbody.velocity = new Vector2(0, characterRigidbody.velocity.y);
-            if (zemineDegdiMi==true)
-            {
-                characterAnimator.Play("Idle");
-            }
-        }
 
 
 
 
-        if (Input.GetKeyDown(KeyCode.Space) && zemineDegdiMi==true)
-        {
-            characterRigidbody.AddForce(new Vector2(0,ziplamaGucu));
-            characterAnimator.Play("Jump");
+            if (Input.GetKeyDown(KeyCode.Space) && zemineDegdiMi == true)
+            {
+                characterRigidbody.AddForce(new Vector2(0, ziplamaGucu));
+                characterAnimator.Play("Jump");
+            }
+            GroundCheckWithRay();
         }
-        GroundCheckWithRay();
+        
     }
     void GroundCheckWithRay()
     {
