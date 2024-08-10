@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+//3 audiosource, hepsi farklý tuþa atanmýþ, birisi loopta;
 public class CharacterMovement : MonoBehaviour
 {
 
@@ -14,9 +15,12 @@ public class CharacterMovement : MonoBehaviour
 
     Rigidbody2D characterRigidbody;
     SpriteRenderer characterSpriteRenderer;
+    public AudioSource stepSound, jumpSound;
     public static Animator characterAnimator;
     public static bool zemineDegdiMi;
-    public static bool OlduMu;
+    public bool OlduMu;
+    string character_state = "idle";
+    string last_state = "idle";
 
     private void Start()
     {
@@ -48,6 +52,22 @@ public class CharacterMovement : MonoBehaviour
     }
     private void Update()
     {
+        if (last_state!=character_state)
+        {
+            jumpSound.Stop();
+            stepSound.Stop();
+            if (character_state=="run")
+            {
+                stepSound.Play();
+            }
+            if (character_state=="jump")
+            {
+                jumpSound.Play();
+            }
+
+        }
+
+
         if (OlduMu==false)
         {
             if (Input.GetKey(KeyCode.D))
@@ -59,6 +79,8 @@ public class CharacterMovement : MonoBehaviour
                 }
                 if (zemineDegdiMi == true)
                 {
+                    last_state = character_state;
+                    character_state = "run";
                     characterAnimator.Play("Run");
                 }
             }
@@ -71,6 +93,8 @@ public class CharacterMovement : MonoBehaviour
                 }
                 if (zemineDegdiMi == true)
                 {
+                    last_state = character_state;
+                    character_state = "run";
                     characterAnimator.Play("Run");
                 }
             }
@@ -79,6 +103,8 @@ public class CharacterMovement : MonoBehaviour
                 characterRigidbody.velocity = new Vector2(0, characterRigidbody.velocity.y);
                 if (zemineDegdiMi == true)
                 {
+                    last_state = character_state;
+                    character_state = "idle";
                     characterAnimator.Play("Idle");
                 }
             }
@@ -107,6 +133,8 @@ public class CharacterMovement : MonoBehaviour
         {
             zemineDegdiMi = false;
             characterAnimator.Play("Jump");
+            last_state = character_state;
+            character_state = "jump";
         }
         Debug.DrawRay(rayPos.position, rayRotation * rayLength, Color.green);
     }
