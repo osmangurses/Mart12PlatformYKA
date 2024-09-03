@@ -3,25 +3,35 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-//3 audiosource, hepsi farklý tuþa atanmýþ, birisi loopta;
+//Buton atamalarý yapýlacak. son haline getirelecek oyun;
 public class CharacterMovement : MonoBehaviour
 {
 
     public int hiz;
     public int ziplamaGucu;
+
     public Transform rayPos;
     public Vector3 rayRotation;
     public float rayLength;
 
+    int yon = 0;
     Rigidbody2D characterRigidbody;
     SpriteRenderer characterSpriteRenderer;
     public AudioSource stepSound, jumpSound;
     public static Animator characterAnimator;
     public static bool zemineDegdiMi;
     public bool OlduMu;
-    string character_state = "idle";
-    string last_state = "idle";
-
+    private void Awake()
+    {
+        if (!PlayerPrefs.HasKey("level"))
+        {
+            PlayerPrefs.SetInt("level",0);
+        }
+        if (PlayerPrefs.GetInt("level")!= SceneManager.GetActiveScene().buildIndex)
+        {
+            SceneManager.LoadScene(PlayerPrefs.GetInt("level"));
+        }
+    }
     private void Start()
     {
         characterRigidbody = GetComponent<Rigidbody2D>(); 
@@ -32,7 +42,6 @@ public class CharacterMovement : MonoBehaviour
     {
         if (collision.gameObject.tag=="Engel")
         {
-            characterAnimator.Play("Death");
             OlduMu = true;
         }
     }
@@ -41,6 +50,7 @@ public class CharacterMovement : MonoBehaviour
         if (collision.gameObject.tag=="Sandik")
         {
             collision.gameObject.GetComponent<Animator>().Play("ChestOpening");
+            PlayerPrefs.SetInt("level",PlayerPrefs.GetInt("level")+1);
             Invoke("GoToNextLevel",1.5f);
         }
     }
@@ -52,74 +62,47 @@ public class CharacterMovement : MonoBehaviour
     }
     private void Update()
     {
-        if (last_state!=character_state)
+        characterRigidbody.velocity = new Vector2(yon*hiz,characterRigidbody.velocity.y);
+        GroundCheckWithRay();
+        AnimationController();
+    }
+    void AnimationController()
+    {
+        if (OlduMu)
         {
-            jumpSound.Stop();
-            stepSound.Stop();
-            if (character_state=="run")
-            {
-                stepSound.Play();
-            }
-            if (character_state=="jump")
-            {
-                jumpSound.Play();
-            }
-
+            characterAnimator.Play("Death");
         }
-
-
-        if (OlduMu==false)
+        else if (zemineDegdiMi == true && yon == 0)
         {
-            if (Input.GetKey(KeyCode.D))
-            {
-                characterRigidbody.velocity = new Vector2(hiz, characterRigidbody.velocity.y);
-                if (characterSpriteRenderer.flipX == true)
-                {
-                    characterSpriteRenderer.flipX = false;
-                }
-                if (zemineDegdiMi == true)
-                {
-                    last_state = character_state;
-                    character_state = "run";
-                    characterAnimator.Play("Run");
-                }
-            }
-            else if (Input.GetKey(KeyCode.A))
-            {
-                characterRigidbody.velocity = new Vector2(-hiz, characterRigidbody.velocity.y);
-                if (characterSpriteRenderer.flipX == false)
-                {
-                    characterSpriteRenderer.flipX = true;
-                }
-                if (zemineDegdiMi == true)
-                {
-                    last_state = character_state;
-                    character_state = "run";
-                    characterAnimator.Play("Run");
-                }
-            }
-            else
-            {
-                characterRigidbody.velocity = new Vector2(0, characterRigidbody.velocity.y);
-                if (zemineDegdiMi == true)
-                {
-                    last_state = character_state;
-                    character_state = "idle";
-                    characterAnimator.Play("Idle");
-                }
-            }
-
-
-
-
-            if (Input.GetKeyDown(KeyCode.Space) && zemineDegdiMi == true)
-            {
-                characterRigidbody.AddForce(new Vector2(0, ziplamaGucu));
-                characterAnimator.Play("Jump");
-            }
-            GroundCheckWithRay();
+            characterAnimator.Play("Idle");
         }
-        
+        else if (zemineDegdiMi == true && yon != 0)
+        {
+            characterAnimator.Play("Run");
+        }
+        else if (zemineDegdiMi == false && OlduMu == false)
+        {
+            characterAnimator.Play("Jump");
+        }
+    }
+    public void YonDegis(int yeniYon)
+    {
+        yon = yeniYon;
+        if (yeniYon==-1)
+        {
+            characterSpriteRenderer.flipX = true;
+        }
+        else if (yeniYon==1) 
+        {
+            characterSpriteRenderer.flipX = false;
+        }
+    }
+    public void Jump()
+    {
+        if(zemineDegdiMi==true)
+        {
+            characterRigidbody.AddForce(ziplamaGucu * Vector2.up);
+        }
     }
     void GroundCheckWithRay()
     {
@@ -132,9 +115,7 @@ public class CharacterMovement : MonoBehaviour
         else
         {
             zemineDegdiMi = false;
-            characterAnimator.Play("Jump");
-            last_state = character_state;
-            character_state = "jump";
+
         }
         Debug.DrawRay(rayPos.position, rayRotation * rayLength, Color.green);
     }
