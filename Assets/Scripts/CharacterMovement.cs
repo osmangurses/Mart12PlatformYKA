@@ -64,6 +64,7 @@ public class CharacterMovement : MonoBehaviour
     {
         characterRigidbody.velocity = new Vector2(yon*hiz,characterRigidbody.velocity.y);
         GroundCheckWithRay();
+        KeyboardController();
         AnimationController();
     }
     void AnimationController()
@@ -84,6 +85,26 @@ public class CharacterMovement : MonoBehaviour
         {
             characterAnimator.Play("Jump");
         }
+    }
+    public void KeyboardController()
+    {
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            YonDegis(-1);
+        }
+        if (Input.GetKeyDown(KeyCode.D))
+        {
+            YonDegis(1);
+        }
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Jump();
+        }
+        if (Input.GetKeyUp(KeyCode.D)  || Input.GetKeyUp(KeyCode.A))
+        {
+            YonDegis(0);
+        }
+
     }
     public void YonDegis(int yeniYon)
     {
